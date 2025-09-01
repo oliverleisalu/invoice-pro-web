@@ -12,6 +12,13 @@ export interface User {
   bank_details?: string
 }
 
+export interface BankAccount {
+  id: string
+  bankName: string
+  accountNumber: string
+  bicSwift: string
+}
+
 export interface Client {
   id: string
   user_id: string

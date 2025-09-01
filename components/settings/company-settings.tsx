@@ -23,7 +23,6 @@ export function CompanySettings({ user, onSave }: CompanySettingsProps) {
     company_address: user.company_address || "",
     company_logo_url: user.company_logo_url || "",
     tax_id: user.tax_id || "",
-    bank_details: user.bank_details || "",
     email: user.email || "",
   })
 
@@ -94,25 +93,14 @@ export function CompanySettings({ user, onSave }: CompanySettingsProps) {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="tax_id">Tax ID / Registration Number</Label>
-              <Input
-                id="tax_id"
-                value={formData.tax_id}
-                onChange={(e) => handleInputChange("tax_id", e.target.value)}
-                placeholder="Enter tax ID or registration number"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bank_details">Bank Account Details</Label>
-              <Input
-                id="bank_details"
-                value={formData.bank_details}
-                onChange={(e) => handleInputChange("bank_details", e.target.value)}
-                placeholder="Enter bank account details"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="tax_id">Tax ID / Registration Number</Label>
+            <Input
+              id="tax_id"
+              value={formData.tax_id}
+              onChange={(e) => handleInputChange("tax_id", e.target.value)}
+              placeholder="Enter tax ID or registration number"
+            />
           </div>
 
           <div className="flex justify-end">
