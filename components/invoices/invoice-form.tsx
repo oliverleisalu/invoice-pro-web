@@ -72,8 +72,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
       const subtotal = item.quantity * (item.unit_price || 0)
       const discountAmount = subtotal * (item.tax_rate || 0) // Using tax_rate field for discount percentage
       const discountedAmount = subtotal - discountAmount
-      const tax = discountedAmount * globalTaxRate
-      newItems[index].total = discountedAmount + tax
+      newItems[index].total = discountedAmount // Line item total without tax
     }
 
     setItems(newItems)
@@ -778,14 +777,9 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
                         <SelectItem value="gal">gal</SelectItem>
                         <SelectItem value="hr">hr</SelectItem>
                         <SelectItem value="day">day</SelectItem>
-                        <SelectItem value="wk">wk</SelectItem>
-                        <SelectItem value="mo">mo</SelectItem>
-                        <SelectItem value="yr">yr</SelectItem>
                         <SelectItem value="sqm">sqm</SelectItem>
                         <SelectItem value="sqft">sqft</SelectItem>
                         <SelectItem value="pack">pack</SelectItem>
-                        <SelectItem value="dozen">dozen</SelectItem>
-                        <SelectItem value="pair">pair</SelectItem>
                         <SelectItem value="set">set</SelectItem>
                       </SelectContent>
                     </Select>
@@ -883,8 +877,18 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
                 min="0"
                 max="100"
                 step="0.01"
-                value={(currentTaxRate * 100).toFixed(2)}
-                onChange={(e) => setCurrentTaxRate(Number.parseFloat(e.target.value || "0") / 100)}
+                value={currentTaxRate * 100}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || value === ".") {
+                    setCurrentTaxRate(0);
+                  } else {
+                    const numericValue = Number.parseFloat(value);
+                    if (!isNaN(numericValue)) {
+                      setCurrentTaxRate(numericValue / 100);
+                    }
+                  }
+                }}
                 placeholder="8.00"
               />
               <p className="text-sm text-muted-foreground">

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,6 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { User } from "@/lib/types"
 import { Upload, Save, Key, Shield } from "lucide-react"
+import { supabase, getCurrentUser } from "@/lib/supabase"
+import type { Database } from "@/types/database"
+
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"]
+type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"]
 
 interface UserProfileProps {
   user: User
@@ -19,11 +24,66 @@ interface UserProfileProps {
 export function UserProfile({ user, onSave }: UserProfileProps) {
   const [formData, setFormData] = useState({
     email: user.email || "",
-    first_name: "John", // These would come from user profile in real app
-    last_name: "Doe",
-    phone: "+1 (555) 123-4567",
+    first_name: "",
+    last_name: "",
+    phone: "",
     profile_image: "",
   })
+
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const authUser = await getCurrentUser()
+        if (!authUser) {
+          setError("Not authenticated")
+          setLoading(false)
+          return
+        }
+
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("email, full_name, phone, logo_url")
+          .eq("id", authUser.id)
+          .single()
+
+        const profile = data as ProfileRow | null
+
+        if (error || !profile) {
+          // If no row exists yet, initialize with auth values
+          setFormData((prev) => ({
+            ...prev,
+            email: authUser.email ?? prev.email,
+            first_name: (authUser.user_metadata?.full_name || "").split(" ")[0] || "",
+            last_name: ((authUser.user_metadata?.full_name || "").split(" ").slice(1).join(" ") || "").trim(),
+            phone: "",
+            profile_image: "",
+          }))
+        } else if (profile) {
+          const fullName = profile.full_name || ""
+          const [first, ...rest] = fullName.split(" ")
+          setFormData({
+            email: profile.email || authUser.email || "",
+            first_name: first || "",
+            last_name: rest.join(" ") || "",
+            phone: profile.phone || "",
+            profile_image: profile.logo_url || "",
+          })
+        }
+      } catch (e: any) {
+        setError(e?.message || "Failed to load profile")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProfile()
+  }, [])
 
   const [passwordData, setPasswordData] = useState({
     current_password: "",
@@ -31,9 +91,42 @@ export function UserProfile({ user, onSave }: UserProfileProps) {
     confirm_password: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSave?.(formData)
+    setSaving(true)
+    setError(null)
+    try {
+      const authUser = await getCurrentUser()
+      if (!authUser) {
+        setError("Not authenticated")
+        setSaving(false)
+        return
+      }
+
+      const full_name = `${formData.first_name} ${formData.last_name}`.trim()
+
+      const payload: ProfileInsert = {
+        id: authUser.id,
+        email: formData.email,
+        full_name,
+        phone: formData.phone,
+        logo_url: formData.profile_image,
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert(payload as any, { onConflict: "id" })
+
+      if (error) {
+        setError(error.message)
+      } else {
+        onSave?.({ email: formData.email })
+      }
+    } catch (e: any) {
+      setError(e?.message || "Failed to save profile")
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handlePasswordChange = (e: React.FormEvent) => {
@@ -116,10 +209,13 @@ export function UserProfile({ user, onSave }: UserProfileProps) {
               </div>
             </div>
 
+            {error && (
+              <p className="text-sm text-red-600">{error}</p>
+            )}
             <div className="flex justify-end">
-              <Button type="submit">
+              <Button type="submit" disabled={loading || saving}>
                 <Save className="mr-2 h-4 w-4" />
-                Save Profile
+                {saving ? "Saving..." : "Save Profile"}
               </Button>
             </div>
           </form>

@@ -10,17 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import type { User } from "@/lib/types"
-import { Save, Plus, Trash2 } from "lucide-react"
+import { Save } from "lucide-react"
 
 interface ApplicationSettingsProps {
   user: User
   onSave?: (data: Partial<User>) => void
-}
-
-interface TaxRate {
-  id: string
-  name: string
-  rate: number
 }
 
 export function ApplicationSettings({ user, onSave }: ApplicationSettingsProps) {
@@ -29,12 +23,6 @@ export function ApplicationSettings({ user, onSave }: ApplicationSettingsProps) 
     default_payment_terms: user.default_payment_terms || 30,
     default_tax_rate: user.default_tax_rate || 0.08,
   })
-
-  const [taxRates, setTaxRates] = useState<TaxRate[]>([
-    { id: "1", name: "Standard Rate", rate: 8.0 },
-    { id: "2", name: "Reduced Rate", rate: 5.0 },
-    { id: "3", name: "Zero Rate", rate: 0.0 },
-  ])
 
   const [invoiceSettings, setInvoiceSettings] = useState({
     invoice_prefix: "INV",
@@ -57,23 +45,6 @@ export function ApplicationSettings({ user, onSave }: ApplicationSettingsProps) 
       ...formData,
       // In a real app, these would be stored in separate settings tables
     })
-  }
-
-  const addTaxRate = () => {
-    const newRate: TaxRate = {
-      id: Date.now().toString(),
-      name: "New Tax Rate",
-      rate: 0,
-    }
-    setTaxRates([...taxRates, newRate])
-  }
-
-  const updateTaxRate = (id: string, field: keyof TaxRate, value: string | number) => {
-    setTaxRates(taxRates.map((rate) => (rate.id === id ? { ...rate, [field]: value } : rate)))
-  }
-
-  const removeTaxRate = (id: string) => {
-    setTaxRates(taxRates.filter((rate) => rate.id !== id))
   }
 
   return (
@@ -129,55 +100,23 @@ export function ApplicationSettings({ user, onSave }: ApplicationSettingsProps) 
                   min="0"
                   max="100"
                   step="0.01"
-                  value={(formData.default_tax_rate * 100).toFixed(2)}
-                  onChange={(e) => setFormData({ ...formData, default_tax_rate: Number.parseFloat(e.target.value) / 100 })}
+                  value={formData.default_tax_rate * 100}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "" || value === ".") {
+                      setFormData({ ...formData, default_tax_rate: 0 });
+                    } else {
+                      const numericValue = Number.parseFloat(value);
+                      if (!isNaN(numericValue)) {
+                        setFormData({ ...formData, default_tax_rate: numericValue / 100 });
+                      }
+                    }
+                  }}
                   placeholder="8.00"
                 />
               </div>
             </div>
           </form>
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-2xl">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Tax Rates</CardTitle>
-          <Button onClick={addTaxRate} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Tax Rate
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {taxRates.map((rate) => (
-              <div key={rate.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                <div className="flex-1">
-                  <Input
-                    value={rate.name}
-                    onChange={(e) => updateTaxRate(rate.id, "name", e.target.value)}
-                    placeholder="Tax rate name"
-                  />
-                </div>
-                <div className="w-32">
-                  <div className="flex items-center">
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      value={rate.rate}
-                      onChange={(e) => updateTaxRate(rate.id, "rate", Number.parseFloat(e.target.value) || 0)}
-                      className="text-right"
-                    />
-                    <span className="ml-2 text-muted-foreground">%</span>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => removeTaxRate(rate.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
         </CardContent>
       </Card>
 
