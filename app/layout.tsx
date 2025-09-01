@@ -36,7 +36,7 @@ export default function RootLayout({
               </div>
               
               {/* Main content */}
-              <div className="lg:block">
+              <div className="lg:block bg-gray-50">
                 {children}
               </div>
             </main>

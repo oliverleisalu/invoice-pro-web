@@ -40,7 +40,7 @@ export function Sidebar() {
       
       {/* Sidebar */}
       <div className={cn(
-        "fixed lg:static inset-y-0 left-0 z-50 flex h-full w-64 flex-col bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out",
+        "fixed lg:static inset-y-0 left-0 z-50 flex h-full w-64 flex-col border-r border-sidebar-border transform transition-transform duration-300 ease-in-out",
         isMobile && !isOpen && "-translate-x-full",
         "lg:translate-x-0 lg:relative"
       )}>
