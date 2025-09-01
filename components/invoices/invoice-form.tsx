@@ -193,7 +193,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     const col2 = col1 + 80
     const col3 = col2 + 25
     const col4 = col3 + 25
-    const col5 = col4 + 25
+    const col5 = col4 + 35
     
     pdf.text("Description", col1, yPos)
     pdf.text("Qty", col2, yPos)
@@ -386,7 +386,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     const col2 = col1 + 80
     const col3 = col2 + 25
     const col4 = col3 + 25
-    const col5 = col4 + 25
+    const col5 = col4 + 35
     
     pdf.text("Description", col1, yPos)
     pdf.text("Qty", col2, yPos)
