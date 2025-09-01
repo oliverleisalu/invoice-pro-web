@@ -25,10 +25,10 @@ export function InvoiceStatusChart({ invoices }: InvoiceStatusChartProps) {
   }))
 
   const COLORS = {
-    paid: "hsl(var(--chart-1))",
-    sent: "hsl(var(--chart-2))",
-    overdue: "hsl(var(--chart-3))",
-    draft: "hsl(var(--chart-4))",
+    paid: "#22c55e", // green
+    sent: "#3b82f6", // blue
+    overdue: "#ef4444", // red
+    draft: "#eab308", // yellow
   }
 
   const chartConfig = {
