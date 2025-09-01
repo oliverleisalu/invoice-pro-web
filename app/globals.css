@@ -1,0 +1,182 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #374151;
+  /* Updated card colors from green to blue theme */
+  --card: #eff6ff;
+  --card-foreground: #374151;
+  --popover: #ffffff;
+  --popover-foreground: #374151;
+  /* Changed primary color from green (#15803d) to blue (#1d4ed8) */
+  --primary: #1d4ed8;
+  --primary-foreground: #ffffff;
+  /* Updated secondary color from lime to blue accent (#3b82f6) */
+  --secondary: #3b82f6;
+  --secondary-foreground: #ffffff;
+  /* Updated muted background to blue tint */
+  --muted: #eff6ff;
+  --muted-foreground: #6b7280;
+  /* Changed accent color to blue (#3b82f6) */
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  /* Updated input background to blue tint */
+  --input: #eff6ff;
+  /* Changed ring color to blue with opacity */
+  --ring: rgba(29, 78, 216, 0.5);
+  /* Updated all chart colors to blue palette */
+  --chart-1: #1e40af;
+  --chart-2: #1d4ed8;
+  --chart-3: #3b82f6;
+  --chart-4: #60a5fa;
+  --chart-5: #dbeafe;
+  --radius: 0.5rem;
+  /* Updated sidebar colors to blue theme */
+  --sidebar: #eff6ff;
+  --sidebar-foreground: #374151;
+  --sidebar-primary: #1d4ed8;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #3b82f6;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: rgba(29, 78, 216, 0.5);
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  /* Changed dark mode primary from green to blue (#3b82f6) */
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  /* Updated dark mode secondary to blue accent */
+  --secondary: #60a5fa;
+  --secondary-foreground: #0f172a;
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  /* Changed dark mode accent to blue */
+  --accent: #60a5fa;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #f1f5f9;
+  --border: #334155;
+  --input: #334155;
+  /* Updated dark mode ring to blue */
+  --ring: rgba(59, 130, 246, 0.5);
+  /* Updated dark mode chart colors to blue palette */
+  --chart-1: #1e40af;
+  --chart-2: #3b82f6;
+  --chart-3: #60a5fa;
+  --chart-4: #93c5fd;
+  --chart-5: #1e3a8a;
+  /* Updated dark mode sidebar colors to blue theme */
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #334155;
+  --sidebar-ring: rgba(59, 130, 246, 0.5);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Increased base font size from default 16px to 18px for better readability */
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  /* Added global typography improvements for better readability */
+  h1 {
+    @apply text-4xl font-bold leading-tight;
+  }
+
+  h2 {
+    @apply text-3xl font-semibold leading-tight;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold leading-snug;
+  }
+
+  p {
+    @apply text-lg leading-relaxed;
+  }
+
+  /* Improved form input text sizes */
+  input,
+  textarea,
+  select {
+    @apply text-lg;
+  }
+
+  /* Enhanced button text readability */
+  button {
+    @apply text-lg;
+  }
+
+  /* Improved table text sizes */
+  table {
+    @apply text-lg;
+  }
+
+  /* Enhanced label readability */
+  label {
+    @apply text-lg font-medium;
+  }
+}
