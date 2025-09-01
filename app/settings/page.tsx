@@ -3,13 +3,16 @@
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CompanySettings } from "@/components/settings/company-settings"
+import { BankAccounts } from "@/components/settings/bank-accounts"
 import { ApplicationSettings } from "@/components/settings/application-settings"
 import { UserProfile } from "@/components/settings/user-profile"
 import { sampleUser } from "@/lib/sample-data"
+import type { BankAccount } from "@/lib/types"
 import { Building2, Settings, User } from "lucide-react"
 
 export default function SettingsPage() {
   const [user, setUser] = useState(sampleUser)
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
 
   const handleSaveCompany = (data: any) => {
     setUser({ ...user, ...data })
@@ -24,6 +27,20 @@ export default function SettingsPage() {
   const handleSaveProfile = (data: any) => {
     setUser({ ...user, ...data })
     console.log("Profile saved:", data)
+  }
+
+  const handleAddBankAccount = (account: Omit<BankAccount, "id">) => {
+    const newAccount: BankAccount = {
+      ...account,
+      id: `bank-${Date.now()}`,
+    }
+    setBankAccounts([...bankAccounts, newAccount])
+    console.log("Bank account added:", newAccount)
+  }
+
+  const handleRemoveBankAccount = (id: string) => {
+    setBankAccounts(bankAccounts.filter(account => account.id !== id))
+    console.log("Bank account removed:", id)
   }
 
   return (
@@ -48,8 +65,13 @@ export default function SettingsPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="company">
+        <TabsContent value="company" className="space-y-6">
           <CompanySettings user={user} onSave={handleSaveCompany} />
+          <BankAccounts
+            bankAccounts={bankAccounts}
+            onAddAccount={handleAddBankAccount}
+            onRemoveAccount={handleRemoveBankAccount}
+          />
         </TabsContent>
 
         <TabsContent value="application">

@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 import type { ChartData } from "@/lib/types"
 import { formatCurrency } from "@/lib/utils"
 
@@ -27,7 +27,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
           }}
         >
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <YAxis
@@ -40,15 +40,12 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 content={<ChartTooltipContent nameKey="month" />}
                 formatter={(value: number) => [formatCurrency(value), "Revenue"]}
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="revenue"
-                stroke="hsl(var(--chart-1))"
-                strokeWidth={2}
-                dot={{ fill: "hsl(var(--chart-1))", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "hsl(var(--chart-1))", strokeWidth: 2 }}
+                fill="hsl(var(--chart-1))"
+                radius={[4, 4, 0, 0]}
               />
-            </LineChart>
+            </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
