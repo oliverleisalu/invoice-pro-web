@@ -13,7 +13,16 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import type { Client, InvoiceItem } from "@/lib/types"
 import { Plus, Trash2, Save, Send, FileText, UserPlus, Download } from "lucide-react"
 import jsPDF from "jspdf"
-import { sampleCompany } from "@/lib/sample-data"
+// Default company data - TODO: Replace with user profile data from Supabase
+const defaultCompany = {
+  name: "Your Company Name",
+  address: "123 Business St",
+  city: "Your City",
+  state: "ST",
+  zipCode: "12345",
+  phone: "(555) 123-4567",
+  email: "info@yourcompany.com"
+}
 
 interface InvoiceFormProps {
   clients: Client[]
@@ -137,15 +146,15 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     yPos += 15
     pdf.setFontSize(12)
     pdf.setFont("helvetica", "normal")
-    pdf.text(sampleCompany.name, leftMargin, yPos)
+    pdf.text(defaultCompany.name, leftMargin, yPos)
     yPos += 5
-    pdf.text(sampleCompany.address, leftMargin, yPos)
+    pdf.text(defaultCompany.address, leftMargin, yPos)
     yPos += 5
-    pdf.text(`${sampleCompany.city}, ${sampleCompany.state} ${sampleCompany.zipCode}`, leftMargin, yPos)
+    pdf.text(`${defaultCompany.city}, ${defaultCompany.state} ${defaultCompany.zipCode}`, leftMargin, yPos)
     yPos += 5
-    pdf.text(`Phone: ${sampleCompany.phone}`, leftMargin, yPos)
+    pdf.text(`Phone: ${defaultCompany.phone}`, leftMargin, yPos)
     yPos += 5
-    pdf.text(`Email: ${sampleCompany.email}`, leftMargin, yPos)
+    pdf.text(`Email: ${defaultCompany.email}`, leftMargin, yPos)
     
     // Invoice details (right side)
     yPos = 35
@@ -330,15 +339,15 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     yPos += 15
     pdf.setFontSize(12)
     pdf.setFont("helvetica", "normal")
-    pdf.text(sampleCompany.name, leftMargin, yPos)
+    pdf.text(defaultCompany.name, leftMargin, yPos)
     yPos += 5
-    pdf.text(sampleCompany.address, leftMargin, yPos)
+    pdf.text(defaultCompany.address, leftMargin, yPos)
     yPos += 5
-    pdf.text(`${sampleCompany.city}, ${sampleCompany.state} ${sampleCompany.zipCode}`, leftMargin, yPos)
+    pdf.text(`${defaultCompany.city}, ${defaultCompany.state} ${defaultCompany.zipCode}`, leftMargin, yPos)
     yPos += 5
-    pdf.text(`Phone: ${sampleCompany.phone}`, leftMargin, yPos)
+    pdf.text(`Phone: ${defaultCompany.phone}`, leftMargin, yPos)
     yPos += 5
-    pdf.text(`Email: ${sampleCompany.email}`, leftMargin, yPos)
+    pdf.text(`Email: ${defaultCompany.email}`, leftMargin, yPos)
     
     // Invoice details (right side)
     yPos = 35

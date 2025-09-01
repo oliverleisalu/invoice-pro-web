@@ -6,12 +6,24 @@ import { CompanySettings } from "@/components/settings/company-settings"
 import { BankAccounts } from "@/components/settings/bank-accounts"
 import { ApplicationSettings } from "@/components/settings/application-settings"
 import { UserProfile } from "@/components/settings/user-profile"
-import { sampleUser } from "@/lib/sample-data"
+// Default user data - TODO: Replace with Supabase user data
+const defaultUser = {
+  id: "user-1",
+  name: "John Doe",
+  email: "john@example.com",
+  company: "Your Company",
+  address: "123 Business St",
+  city: "Your City",
+  state: "ST",
+  zipCode: "12345",
+  phone: "(555) 123-4567",
+  taxId: "12-3456789"
+}
 import type { BankAccount } from "@/lib/types"
 import { Building2, Settings, User } from "lucide-react"
 
 export default function SettingsPage() {
-  const [user, setUser] = useState(sampleUser)
+  const [user, setUser] = useState(defaultUser)
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
 
   const handleSaveCompany = (data: any) => {

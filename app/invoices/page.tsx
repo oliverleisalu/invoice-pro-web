@@ -1,10 +1,27 @@
+"use client"
+
 import { InvoiceTable } from "@/components/invoices/invoice-table"
 import { Button } from "@/components/ui/button"
-import { sampleInvoices } from "@/lib/sample-data"
+import { useInvoices } from "@/hooks/use-invoices"
 import Link from "next/link"
 import { Plus } from "lucide-react"
 
 export default function InvoicesPage() {
+  const { invoices, loading } = useInvoices()
+
+  if (loading) {
+    return (
+      <div className="flex-1 space-y-4 px-4 py-6 sm:px-6 lg:px-8 container mx-auto max-w-7xl">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading invoices...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex-1 space-y-4 px-4 py-6 sm:px-6 lg:px-8 container mx-auto max-w-7xl">
       {/* Mobile-first header */}
@@ -21,7 +38,7 @@ export default function InvoicesPage() {
         </Button>
       </div>
 
-      <InvoiceTable invoices={sampleInvoices} />
+      <InvoiceTable invoices={invoices} />
     </div>
   )
 }

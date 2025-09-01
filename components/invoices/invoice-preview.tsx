@@ -1,7 +1,16 @@
 "use client"
 import { Separator } from "@/components/ui/separator"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { sampleCompany } from "@/lib/sample-data"
+// Default company data - TODO: Replace with user profile data from Supabase
+const defaultCompany = {
+  name: "Your Company Name",
+  address: "123 Business St",
+  city: "Your City",
+  state: "ST",
+  zipCode: "12345",
+  phone: "(555) 123-4567",
+  email: "info@yourcompany.com"
+}
 
 interface InvoicePreviewProps {
   invoice: {
@@ -39,11 +48,11 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-blue-600 mb-2" style={{ fontSize: '24px' }}>INVOICE</h1>
         <div className="text-sm">
-          <p className="font-semibold">{sampleCompany.name}</p>
-          <p>{sampleCompany.address}</p>
-          <p>{sampleCompany.city}, {sampleCompany.state} {sampleCompany.zipCode}</p>
-          <p>Phone: {sampleCompany.phone}</p>
-          <p>Email: {sampleCompany.email}</p>
+          <p className="font-semibold">{defaultCompany.name}</p>
+          <p>{defaultCompany.address}</p>
+          <p>{defaultCompany.city}, {defaultCompany.state} {defaultCompany.zipCode}</p>
+          <p>Phone: {defaultCompany.phone}</p>
+          <p>Email: {defaultCompany.email}</p>
         </div>
       </div>
 

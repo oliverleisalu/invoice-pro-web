@@ -3,11 +3,13 @@
 import { useState } from "react"
 import { ClientTable } from "@/components/clients/client-table"
 import { ClientDialog } from "@/components/clients/client-dialog"
-import { sampleClients, sampleInvoices } from "@/lib/sample-data"
-import type { Client } from "@/lib/types"
+import { useClients } from "@/hooks/use-clients"
+import type { Database } from "@/types/database"
+
+type Client = Database['public']['Tables']['clients']['Row']
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState(sampleClients)
+  const { clients, loading, addClient, updateClient, deleteClient } = useClients()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<Client | undefined>()
 
@@ -21,26 +23,27 @@ export default function ClientsPage() {
     setDialogOpen(true)
   }
 
-  const handleSaveClient = (clientData: Partial<Client>) => {
-    if (editingClient) {
-      // Update existing client
-      setClients(clients.map((c) => (c.id === editingClient.id ? { ...c, ...clientData } : c)))
-    } else {
-      // Add new client
-      const newClient: Client = {
-        id: `client-${Date.now()}`,
-        user_id: "user-1",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        ...clientData,
-      } as Client
-      setClients([...clients, newClient])
+  const handleSaveClient = async (clientData: Partial<Client>) => {
+    try {
+      if (editingClient) {
+        await updateClient(editingClient.id, clientData)
+      } else {
+        await addClient(clientData)
+      }
+      setDialogOpen(false)
+      setEditingClient(undefined)
+    } catch (error) {
+      console.error("Failed to save client:", error)
     }
   }
 
-  const handleDeleteClient = (clientId: string) => {
+  const handleDeleteClient = async (clientId: string) => {
     if (confirm("Are you sure you want to delete this client? This action cannot be undone.")) {
-      setClients(clients.filter((c) => c.id !== clientId))
+      try {
+        await deleteClient(clientId)
+      } catch (error) {
+        console.error("Failed to delete client:", error)
+      }
     }
   }
 
@@ -56,7 +59,7 @@ export default function ClientsPage() {
 
       <ClientTable
         clients={clients}
-        invoices={sampleInvoices}
+        invoices={[]}
         onAddClient={handleAddClient}
         onEditClient={handleEditClient}
         onDeleteClient={handleDeleteClient}

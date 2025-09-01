@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useSidebar } from "@/components/sidebar-provider"
+import { LogoutButton } from "@/components/auth/logout-button"
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -103,7 +104,8 @@ export function Sidebar() {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-4 border-t border-sidebar-border space-y-2">
+          <LogoutButton />
           <div className="text-xs text-muted-foreground text-center">InvoiceApp v1.0.0</div>
         </div>
       </div>

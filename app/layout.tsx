@@ -8,6 +8,8 @@ import { Sidebar } from "@/components/sidebar"
 import { Suspense } from "react"
 import { SidebarToggle } from "@/components/sidebar-toggle"
 import { SidebarProvider } from "@/components/sidebar-provider"
+import { AuthProvider } from "@/lib/auth-context"
+import { AppContent } from "@/components/app-content"
 
 export const metadata: Metadata = {
   title: "InvoiceApp - Modern Invoice Management",
@@ -22,26 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <SidebarProvider>
-          <div className="flex h-screen bg-background">
-            <Suspense fallback={<div>Loading...</div>}>
-              <Sidebar />
-            </Suspense>
-            <main className="flex-1 overflow-auto relative">
-              {/* Mobile header with menu button */}
-              <div className="lg:hidden flex items-center h-16 px-4 border-b border-border bg-background">
-                <SidebarToggle />
-                <h1 className="text-lg font-semibold">InvoiceApp</h1>
-              </div>
-              
-              {/* Main content */}
-              <div className="lg:block bg-gray-50">
-                {children}
-              </div>
-            </main>
-          </div>
-        </SidebarProvider>
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} bg-gray-50`}>
+        <AuthProvider>
+          <AppContent>
+            {children}
+          </AppContent>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

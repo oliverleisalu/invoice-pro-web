@@ -1,21 +1,20 @@
 "use client"
 
 import { InvoiceForm } from "@/components/invoices/invoice-form"
-import { sampleClients } from "@/lib/sample-data"
+import { useClients } from "@/hooks/use-clients"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import type { Client } from "@/lib/types"
 
 export default function NewInvoicePage() {
   const router = useRouter()
+  const { clients, loading } = useClients()
   const [pdfData, setPdfData] = useState<string | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-  const [clients, setClients] = useState<Client[]>(sampleClients)
 
-  const handleSave = (invoice: any) => {
+  const handleSave = async (invoice: any) => {
     console.log("Saving invoice as draft:", invoice)
-    // In a real app, this would save to the database
+    // TODO: Implement invoice saving with Supabase
     router.push("/invoices")
   }
 

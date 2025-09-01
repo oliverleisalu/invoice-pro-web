@@ -3,11 +3,15 @@
 import { useState } from "react"
 import { PaymentTable } from "@/components/payments/payment-table"
 import { PaymentDialog } from "@/components/payments/payment-dialog"
-import { samplePayments, sampleInvoices } from "@/lib/sample-data"
-import type { Payment } from "@/lib/types"
+import { usePayments } from "@/hooks/use-payments"
+import { useInvoices } from "@/hooks/use-invoices"
+import type { Database } from "@/types/database"
+
+type Payment = Database['public']['Tables']['payments']['Row']
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState(samplePayments)
+  const { payments, loading: paymentsLoading, addPayment, updatePayment, deletePayment } = usePayments()
+  const { invoices, loading: invoicesLoading } = useInvoices()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingPayment, setEditingPayment] = useState<Payment | undefined>()
 
@@ -21,25 +25,41 @@ export default function PaymentsPage() {
     setDialogOpen(true)
   }
 
-  const handleSavePayment = (paymentData: Partial<Payment>) => {
-    if (editingPayment) {
-      // Update existing payment
-      setPayments(payments.map((p) => (p.id === editingPayment.id ? { ...p, ...paymentData } : p)))
-    } else {
-      // Add new payment
-      const newPayment: Payment = {
-        id: `payment-${Date.now()}`,
-        created_at: new Date().toISOString(),
-        ...paymentData,
-      } as Payment
-      setPayments([...payments, newPayment])
+  const handleSavePayment = async (paymentData: Partial<Payment>) => {
+    try {
+      if (editingPayment) {
+        await updatePayment(editingPayment.id, paymentData)
+      } else {
+        await addPayment(paymentData)
+      }
+      setDialogOpen(false)
+      setEditingPayment(undefined)
+    } catch (error) {
+      console.error("Failed to save payment:", error)
     }
   }
 
-  const handleDeletePayment = (paymentId: string) => {
+  const handleDeletePayment = async (paymentId: string) => {
     if (confirm("Are you sure you want to delete this payment? This action cannot be undone.")) {
-      setPayments(payments.filter((p) => p.id !== paymentId))
+      try {
+        await deletePayment(paymentId)
+      } catch (error) {
+        console.error("Failed to delete payment:", error)
+      }
     }
+  }
+
+  if (paymentsLoading || invoicesLoading) {
+    return (
+      <div className="flex-1 space-y-4 px-4 py-6 sm:px-6 lg:px-8 container mx-auto max-w-7xl">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading payments...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -54,7 +74,7 @@ export default function PaymentsPage() {
 
       <PaymentTable
         payments={payments}
-        invoices={sampleInvoices}
+        invoices={invoices}
         onAddPayment={handleAddPayment}
         onEditPayment={handleEditPayment}
         onDeletePayment={handleDeletePayment}
@@ -64,7 +84,7 @@ export default function PaymentsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         payment={editingPayment}
-        invoices={sampleInvoices}
+        invoices={invoices}
         onSave={handleSavePayment}
       />
     </div>
