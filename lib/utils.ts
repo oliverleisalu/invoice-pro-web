@@ -1,5 +1,10 @@
-export function cn(...inputs: (string | undefined | null | boolean)[]): string {
-  return inputs.filter(Boolean).join(" ")
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+
+
 }
 
 export function formatCurrency(amount: number, currency = "USD"): string {
@@ -41,3 +46,4 @@ export function isInvoiceOverdue(dueDate: string, status: string): boolean {
   if (status === "paid") return false
   return new Date(dueDate) < new Date()
 }
+
