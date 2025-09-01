@@ -35,7 +35,7 @@ export function QuickActions() {
   ]
 
   return (
-    <div className="bg-card border rounded-xl p-4 shadow-2xl">
+    <div className="bg-white border rounded-2xl p-4 shadow-2xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold text-card-foreground">Quick Actions</h2>

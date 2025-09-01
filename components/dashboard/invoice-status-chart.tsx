@@ -60,7 +60,7 @@ export function InvoiceStatusChart({ invoices }: InvoiceStatusChartProps) {
         <CardDescription>Breakdown of invoice statuses</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px] text-green-700">
+        <ChartContainer config={chartConfig} className="text-green-700">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={120} paddingAngle={5} dataKey="value">

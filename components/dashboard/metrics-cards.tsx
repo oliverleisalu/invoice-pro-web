@@ -18,7 +18,7 @@ export function MetricsCards({ metrics }: MetricsCardsProps) {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(metrics.monthly_revenue)}</div>
+          <div className="text-4xl font-bold">{formatCurrency(metrics.monthly_revenue)}</div>
           <div className="flex items-center text-xs text-muted-foreground">
             {isPositiveChange ? (
               <TrendingUp className="mr-1 h-3 w-3 text-green-600" />
@@ -39,7 +39,7 @@ export function MetricsCards({ metrics }: MetricsCardsProps) {
           <FileText className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{metrics.total_invoices_this_month}</div>
+          <div className="text-4xl font-bold">{metrics.total_invoices_this_month}</div>
           <p className="text-xs text-muted-foreground">Total invoices sent</p>
         </CardContent>
       </Card>
@@ -50,7 +50,7 @@ export function MetricsCards({ metrics }: MetricsCardsProps) {
           <AlertCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-orange-600">{metrics.outstanding_invoices}</div>
+          <div className="text-4xl font-bold">{metrics.outstanding_invoices}</div>
           <p className="text-xs text-muted-foreground">Awaiting payment</p>
         </CardContent>
       </Card>
@@ -61,7 +61,7 @@ export function MetricsCards({ metrics }: MetricsCardsProps) {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600">{metrics.recent_payments}</div>
+          <div className="text-4xl font-bold">{metrics.recent_payments}</div>
           <p className="text-xs text-muted-foreground">This week</p>
         </CardContent>
       </Card>
