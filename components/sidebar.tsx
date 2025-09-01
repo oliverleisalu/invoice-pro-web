@@ -12,8 +12,8 @@ import { LogoutButton } from "@/components/auth/logout-button"
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Invoices", href: "/invoices", icon: FileText, badge: "8" },
-  { name: "Clients", href: "/clients", icon: Users, badge: "6" },
+  { name: "Invoices", href: "/invoices", icon: FileText},
+  { name: "Clients", href: "/clients", icon: Users},
   { name: "Payments", href: "/payments", icon: CreditCard },
   { name: "Settings", href: "/settings", icon: Settings },
 ]

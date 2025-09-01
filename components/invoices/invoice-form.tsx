@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import type { Client, InvoiceItem } from "@/lib/types"
+import { sampleUser } from "@/lib/sample-data"
 import { Plus, Trash2, Save, Send, FileText, UserPlus, Download } from "lucide-react"
 import jsPDF from "jspdf"
 // Default company data - TODO: Replace with user profile data from Supabase
@@ -56,10 +57,11 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
   })
 
   const [items, setItems] = useState<Omit<InvoiceItem, "id" | "invoice_id">[]>([
-    { description: "", quantity: 1, unit_price: 0, tax_rate: 0, total: 0 },
+    { description: "", quantity: 1, unit: "pcs", unit_price: null, tax_rate: 0, total: 0 },
   ])
 
-  const globalTaxRate = 0.08 // 8% - this will come from settings
+  const [currentTaxRate, setCurrentTaxRate] = useState(sampleUser.default_tax_rate || 0.08)
+  const globalTaxRate = currentTaxRate // Use current tax rate that can be overridden
 
   const updateItem = (index: number, field: keyof Omit<InvoiceItem, "id" | "invoice_id">, value: any) => {
     const newItems = [...items]
@@ -67,7 +69,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
 
     if (field === "quantity" || field === "unit_price" || field === "tax_rate") {
       const item = newItems[index]
-      const subtotal = item.quantity * item.unit_price
+      const subtotal = item.quantity * (item.unit_price || 0)
       const discountAmount = subtotal * (item.tax_rate || 0) // Using tax_rate field for discount percentage
       const discountedAmount = subtotal - discountAmount
       const tax = discountedAmount * globalTaxRate
@@ -78,7 +80,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
   }
 
   const addItem = () => {
-    setItems([...items, { description: "", quantity: 1, unit_price: 0, tax_rate: 0, total: 0 }])
+    setItems([...items, { description: "", quantity: 1, unit: "pcs", unit_price: null, tax_rate: 0, total: 0 }])
   }
 
   const removeItem = (index: number) => {
@@ -88,8 +90,8 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
   }
 
   const calculateTotals = () => {
-    const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0)
-    const lineDiscounts = items.reduce((sum, item) => sum + item.quantity * item.unit_price * (item.tax_rate || 0), 0)
+    const subtotal = items.reduce((sum, item) => sum + item.quantity * (item.unit_price || 0), 0)
+    const lineDiscounts = items.reduce((sum, item) => sum + item.quantity * (item.unit_price || 0) * (item.tax_rate || 0), 0)
     const subtotalAfterLineDiscounts = subtotal - lineDiscounts
     const taxAmount = subtotalAfterLineDiscounts * globalTaxRate
     const total = subtotalAfterLineDiscounts + taxAmount - formData.discount_amount
@@ -131,18 +133,18 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
 
     // Create new PDF document with A4 dimensions (210mm x 297mm)
     const pdf = new jsPDF("p", "mm", "a4")
-    
+
     // Set initial position
     let yPos = 20
     const leftMargin = 20
     const rightMargin = 190
     const pageWidth = 210
-    
+
     // Company header
     pdf.setFontSize(24)
     pdf.setFont("helvetica", "bold")
     pdf.text("INVOICE", leftMargin, yPos)
-    
+
     yPos += 15
     pdf.setFontSize(12)
     pdf.setFont("helvetica", "normal")
@@ -155,7 +157,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     pdf.text(`Phone: ${defaultCompany.phone}`, leftMargin, yPos)
     yPos += 5
     pdf.text(`Email: ${defaultCompany.email}`, leftMargin, yPos)
-    
+
     // Invoice details (right side)
     yPos = 35
     pdf.setFontSize(10)
@@ -168,7 +170,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
       yPos += 5
       pdf.text(`Ref: ${formData.reference_number}`, rightMargin - 40, yPos, { align: "right" })
     }
-    
+
     // Client information
     yPos += 20
     pdf.setFontSize(12)
@@ -191,41 +193,44 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
       }
       if (selectedClient.country) pdf.text(selectedClient.country, leftMargin, yPos)
     }
-    
+
     // Items table
     yPos += 15
     pdf.setFontSize(10)
     pdf.setFont("helvetica", "bold")
-    
+
     // Table headers
     const col1 = leftMargin
-    const col2 = col1 + 80
-    const col3 = col2 + 25
+    const col2 = col1 + 65
+    const col3 = col2 + 20
     const col4 = col3 + 25
-    const col5 = col4 + 35
-    
+    const col5 = col4 + 25
+    const col6 = col5 + 35
+
     pdf.text("Description", col1, yPos)
     pdf.text("Qty", col2, yPos)
-    pdf.text("Rate", col3, yPos)
-    pdf.text("Amount", col4, yPos)
-    
+    pdf.text("Unit", col3, yPos)
+    pdf.text("Rate", col4, yPos)
+    pdf.text("Amount", col5, yPos)
+
     yPos += 5
     pdf.line(leftMargin, yPos, rightMargin, yPos) // Header line
-    
+
     // Table rows
     yPos += 8
     pdf.setFont("helvetica", "normal")
-    
+
     items.forEach((item) => {
       if (yPos > 250) { // Check if we need a new page
         pdf.addPage()
         yPos = 20
       }
-      
+
       pdf.text(item.description || "Item", col1, yPos)
       pdf.text(item.quantity.toString(), col2, yPos)
-      pdf.text(formatCurrency(item.unit_price), col3, yPos)
-      pdf.text(formatCurrency(item.total), col4, yPos)
+      pdf.text(item.unit || "pcs", col3, yPos)
+      pdf.text(formatCurrency(item.unit_price || 0), col4, yPos)
+      pdf.text(formatCurrency(item.total), col5, yPos)
       yPos += 6
     })
     
@@ -245,7 +250,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     }
     
     yPos += 5
-    pdf.text(`Tax (${Math.round(globalTaxRate * 100)}%):`, col4, yPos)
+    pdf.text(`Tax (${(globalTaxRate * 100).toFixed(2)}%):`, col4, yPos)
     pdf.text(formatCurrency(taxAmount), col5, yPos, { align: "right" })
     
     if (formData.discount_amount > 0) {
@@ -392,33 +397,36 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     
     // Table headers
     const col1 = leftMargin
-    const col2 = col1 + 80
-    const col3 = col2 + 25
+    const col2 = col1 + 65
+    const col3 = col2 + 20
     const col4 = col3 + 25
-    const col5 = col4 + 35
-    
+    const col5 = col4 + 25
+    const col6 = col5 + 35
+
     pdf.text("Description", col1, yPos)
     pdf.text("Qty", col2, yPos)
-    pdf.text("Rate", col3, yPos)
-    pdf.text("Amount", col4, yPos)
-    
+    pdf.text("Unit", col3, yPos)
+    pdf.text("Rate", col4, yPos)
+    pdf.text("Amount", col5, yPos)
+
     yPos += 5
     pdf.line(leftMargin, yPos, rightMargin, yPos) // Header line
-    
+
     // Table rows
     yPos += 8
     pdf.setFont("helvetica", "normal")
-    
+
     items.forEach((item) => {
       if (yPos > 250) { // Check if we need a new page
         pdf.addPage()
         yPos = 20
       }
-      
+
       pdf.text(item.description || "Item", col1, yPos)
       pdf.text(item.quantity.toString(), col2, yPos)
-      pdf.text(formatCurrency(item.unit_price), col3, yPos)
-      pdf.text(formatCurrency(item.total), col4, yPos)
+      pdf.text(item.unit || "pcs", col3, yPos)
+      pdf.text(formatCurrency(item.unit_price || 0), col4, yPos)
+      pdf.text(formatCurrency(item.total), col5, yPos)
       yPos += 6
     })
     
@@ -438,7 +446,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     }
     
     yPos += 5
-    pdf.text(`Tax (${Math.round(globalTaxRate * 100)}%):`, col4, yPos)
+    pdf.text(`Tax (${(globalTaxRate * 100).toFixed(2)}%):`, col4, yPos)
     pdf.text(formatCurrency(taxAmount), col5, yPos, { align: "right" })
     
     if (formData.discount_amount > 0) {
@@ -714,12 +722,8 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
       </Card>
 
       <Card className="shadow-2xl">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle>Line Items</CardTitle>
-          <Button onClick={addItem} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Item
-          </Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -727,6 +731,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
               <TableRow>
                 <TableHead>Description</TableHead>
                 <TableHead className="w-[100px]">Qty</TableHead>
+                <TableHead className="w-[100px]">Unit</TableHead>
                 <TableHead className="w-[120px]">Unit Price</TableHead>
                 <TableHead className="w-[100px]">Discount %</TableHead>
                 <TableHead className="w-[120px]">Total</TableHead>
@@ -752,12 +757,46 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
                     />
                   </TableCell>
                   <TableCell>
+                    <Select
+                      value={item.unit}
+                      onValueChange={(value) => updateItem(index, "unit", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pcs">pcs</SelectItem>
+                        <SelectItem value="box">box</SelectItem>
+                        <SelectItem value="kg">kg</SelectItem>
+                        <SelectItem value="lbs">lbs</SelectItem>
+                        <SelectItem value="m">m</SelectItem>
+                        <SelectItem value="ft">ft</SelectItem>
+                        <SelectItem value="cm">cm</SelectItem>
+                        <SelectItem value="in">in</SelectItem>
+                        <SelectItem value="l">l</SelectItem>
+                        <SelectItem value="ml">ml</SelectItem>
+                        <SelectItem value="gal">gal</SelectItem>
+                        <SelectItem value="hr">hr</SelectItem>
+                        <SelectItem value="day">day</SelectItem>
+                        <SelectItem value="wk">wk</SelectItem>
+                        <SelectItem value="mo">mo</SelectItem>
+                        <SelectItem value="yr">yr</SelectItem>
+                        <SelectItem value="sqm">sqm</SelectItem>
+                        <SelectItem value="sqft">sqft</SelectItem>
+                        <SelectItem value="pack">pack</SelectItem>
+                        <SelectItem value="dozen">dozen</SelectItem>
+                        <SelectItem value="pair">pair</SelectItem>
+                        <SelectItem value="set">set</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
                     <Input
                       type="number"
                       min="0"
                       step="0.01"
-                      value={item.unit_price}
-                      onChange={(e) => updateItem(index, "unit_price", Number.parseFloat(e.target.value) || 0)}
+                      value={item.unit_price ?? ""}
+                      onChange={(e) => updateItem(index, "unit_price", e.target.value === "" ? null : Number.parseFloat(e.target.value) || 0)}
                     />
                   </TableCell>
                   <TableCell>
@@ -788,7 +827,14 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
             </TableBody>
           </Table>
 
-          <div className="mt-6 space-y-2 max-w-sm ml-auto">
+          <div className="mt-4 mb-6">
+            <Button onClick={addItem} size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Item
+            </Button>
+          </div>
+
+          <div className="space-y-2 max-w-sm ml-auto">
             <div className="flex justify-between">
               <span>Subtotal:</span>
               <span>{formatCurrency(subtotal)}</span>
@@ -800,7 +846,7 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
               </div>
             )}
             <div className="flex justify-between">
-              <span>Tax ({Math.round(globalTaxRate * 100)}%):</span>
+              <span>Tax ({(globalTaxRate * 100).toFixed(2)}%):</span>
               <span>{formatCurrency(taxAmount)}</span>
             </div>
             <div className="flex justify-between items-center">
@@ -828,6 +874,24 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
           <CardTitle>Additional Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tax_rate">Tax Rate (%)</Label>
+              <Input
+                id="tax_rate"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value={(currentTaxRate * 100).toFixed(2)}
+                onChange={(e) => setCurrentTaxRate(Number.parseFloat(e.target.value || "0") / 100)}
+                placeholder="8.00"
+              />
+              <p className="text-sm text-muted-foreground">
+                Default: {(sampleUser.default_tax_rate * 100).toFixed(2)}%
+              </p>
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
             <Textarea

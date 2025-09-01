@@ -10,6 +10,7 @@ export const sampleUser: User = {
   company_logo_url: "/acme-corporation-logo.png",
   default_currency: "USD",
   default_payment_terms: 30,
+  default_tax_rate: 0.08,
   tax_id: "12-3456789",
   bank_details: "Bank of America - Account: ****1234",
 }

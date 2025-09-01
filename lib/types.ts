@@ -8,6 +8,7 @@ export interface User {
   company_logo_url?: string
   default_currency: string
   default_payment_terms: number
+  default_tax_rate: number
   tax_id?: string
   bank_details?: string
 }
@@ -58,7 +59,8 @@ export interface InvoiceItem {
   invoice_id: string
   description: string
   quantity: number
-  unit_price: number
+  unit: string
+  unit_price: number | null
   tax_rate: number
   total: number
 }

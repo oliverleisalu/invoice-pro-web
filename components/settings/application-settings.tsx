@@ -27,6 +27,7 @@ export function ApplicationSettings({ user, onSave }: ApplicationSettingsProps) 
   const [formData, setFormData] = useState({
     default_currency: user.default_currency || "USD",
     default_payment_terms: user.default_payment_terms || 30,
+    default_tax_rate: user.default_tax_rate || 0.08,
   })
 
   const [taxRates, setTaxRates] = useState<TaxRate[]>([
@@ -119,6 +120,19 @@ export function ApplicationSettings({ user, onSave }: ApplicationSettingsProps) 
                     <SelectItem value="90">90 days</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="default_tax_rate">Default Tax Rate (%)</Label>
+                <Input
+                  id="default_tax_rate"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={(formData.default_tax_rate * 100).toFixed(2)}
+                  onChange={(e) => setFormData({ ...formData, default_tax_rate: Number.parseFloat(e.target.value) / 100 })}
+                  placeholder="8.00"
+                />
               </div>
             </div>
           </form>
