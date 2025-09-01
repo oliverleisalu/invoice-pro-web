@@ -43,7 +43,7 @@ export default function NewInvoicePage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-6 p-6 container mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Create New Invoice</h1>
         <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>

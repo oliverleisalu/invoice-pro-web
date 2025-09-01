@@ -54,7 +54,7 @@ export function InvoiceStatusChart({ invoices }: InvoiceStatusChartProps) {
   }
 
   return (
-    <Card className="col-span-3 shadow-2xl">
+    <Card className="shadow-2xl">
       <CardHeader>
         <CardTitle>Invoice Status</CardTitle>
         <CardDescription>Breakdown of invoice statuses</CardDescription>

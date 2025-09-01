@@ -12,7 +12,7 @@ interface RevenueChartProps {
 
 export function RevenueChart({ data }: RevenueChartProps) {
   return (
-    <Card className="col-span-4 shadow-2xl">
+    <Card className="shadow-2xl">
       <CardHeader>
         <CardTitle>Revenue Overview</CardTitle>
         <CardDescription>Monthly revenue for the last 6 months</CardDescription>
@@ -25,7 +25,6 @@ export function RevenueChart({ data }: RevenueChartProps) {
               color: "hsl(var(--chart-1))",
             },
           }}
-          className="h-[350px]"
         >
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
