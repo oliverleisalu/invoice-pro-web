@@ -1,7 +1,6 @@
 "use client"
 
 import { InvoiceForm } from "@/components/invoices/invoice-form"
-import { InvoicePreview } from "@/components/invoices/invoice-preview"
 import { sampleClients } from "@/lib/sample-data"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -10,7 +9,7 @@ import type { Client } from "@/lib/types"
 
 export default function NewInvoicePage() {
   const router = useRouter()
-  const [previewData, setPreviewData] = useState<any>(null)
+  const [pdfData, setPdfData] = useState<string | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [clients, setClients] = useState<Client[]>(sampleClients)
 
@@ -26,9 +25,11 @@ export default function NewInvoicePage() {
     router.push("/invoices")
   }
 
-  const handlePreview = (invoice: any) => {
-    setPreviewData(invoice)
-    setIsPreviewOpen(true)
+  const handlePreview = (data: any) => {
+    if (data.pdfData) {
+      setPdfData(data.pdfData)
+      setIsPreviewOpen(true)
+    }
   }
 
   const handleAddClient = (newClient: Omit<Client, "id">) => {
@@ -48,9 +49,19 @@ export default function NewInvoicePage() {
         <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
           <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Invoice Preview</DialogTitle>
+              <DialogTitle>Invoice PDF Preview</DialogTitle>
             </DialogHeader>
-            {previewData && <InvoicePreview invoice={previewData} />}
+            {pdfData && (
+              <div className="w-full h-[70vh]">
+                <iframe
+                  src={pdfData}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                  title="Invoice PDF Preview"
+                />
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

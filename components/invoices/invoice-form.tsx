@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDate } from "@/lib/utils"
 import type { Client, InvoiceItem } from "@/lib/types"
 import { Plus, Trash2, Save, Send, FileText, UserPlus, Download } from "lucide-react"
 import jsPDF from "jspdf"
+import { sampleCompany } from "@/lib/sample-data"
 
 interface InvoiceFormProps {
   clients: Client[]
@@ -136,15 +137,15 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
     yPos += 15
     pdf.setFontSize(12)
     pdf.setFont("helvetica", "normal")
-    pdf.text("Your Company Name", leftMargin, yPos)
+    pdf.text(sampleCompany.name, leftMargin, yPos)
     yPos += 5
-    pdf.text("123 Business Street", leftMargin, yPos)
+    pdf.text(sampleCompany.address, leftMargin, yPos)
     yPos += 5
-    pdf.text("City, State 12345", leftMargin, yPos)
+    pdf.text(`${sampleCompany.city}, ${sampleCompany.state} ${sampleCompany.zipCode}`, leftMargin, yPos)
     yPos += 5
-    pdf.text("Phone: (555) 123-4567", leftMargin, yPos)
+    pdf.text(`Phone: ${sampleCompany.phone}`, leftMargin, yPos)
     yPos += 5
-    pdf.text("Email: info@company.com", leftMargin, yPos)
+    pdf.text(`Email: ${sampleCompany.email}`, leftMargin, yPos)
     
     // Invoice details (right side)
     yPos = 35
@@ -307,26 +308,196 @@ export function InvoiceForm({ clients, onSave, onSend, onPreview, onAddClient }:
 
   const handlePreview = () => {
     const selectedClient = clients.find((c) => c.id === formData.client_id)
-    const previewData = {
-      invoiceNumber: formData.invoice_number,
-      date: formData.issue_date,
-      dueDate: formData.due_date,
-      client: selectedClient,
-      items: items.map((item) => ({
-        description: item.description,
-        quantity: item.quantity,
-        rate: item.unit_price,
-        amount: item.total,
-      })),
-      subtotal,
-      taxRate: Math.round(globalTaxRate * 100),
-      taxAmount,
-      discount: formData.discount_amount,
-      total,
-      notes: formData.notes,
-      terms: formData.terms,
+    if (!selectedClient) {
+      alert("Please select a client first")
+      return
     }
-    onPreview?.(previewData)
+
+    // Create new PDF document with A4 dimensions (210mm x 297mm)
+    const pdf = new jsPDF("p", "mm", "a4")
+    
+    // Set initial position
+    let yPos = 20
+    const leftMargin = 20
+    const rightMargin = 190
+    const pageWidth = 210
+    
+        // Company header
+    pdf.setFontSize(24)
+    pdf.setFont("helvetica", "bold")
+    pdf.text("INVOICE", leftMargin, yPos)
+    
+    yPos += 15
+    pdf.setFontSize(12)
+    pdf.setFont("helvetica", "normal")
+    pdf.text(sampleCompany.name, leftMargin, yPos)
+    yPos += 5
+    pdf.text(sampleCompany.address, leftMargin, yPos)
+    yPos += 5
+    pdf.text(`${sampleCompany.city}, ${sampleCompany.state} ${sampleCompany.zipCode}`, leftMargin, yPos)
+    yPos += 5
+    pdf.text(`Phone: ${sampleCompany.phone}`, leftMargin, yPos)
+    yPos += 5
+    pdf.text(`Email: ${sampleCompany.email}`, leftMargin, yPos)
+    
+    // Invoice details (right side)
+    yPos = 35
+    pdf.setFontSize(10)
+    pdf.text(`Invoice #: ${formData.invoice_number}`, rightMargin - 40, yPos, { align: "right" })
+    yPos += 5
+    pdf.text(`Date: ${new Date(formData.issue_date).toLocaleDateString()}`, rightMargin - 40, yPos, { align: "right" })
+    yPos += 5
+    pdf.text(`Due Date: ${new Date(formData.due_date).toLocaleDateString()}`, rightMargin - 40, yPos, { align: "right" })
+    if (formData.reference_number) {
+      yPos += 5
+      pdf.text(`Ref: ${formData.reference_number}`, rightMargin - 40, yPos, { align: "right" })
+    }
+    
+    // Client information
+    yPos += 20
+    pdf.setFontSize(12)
+    pdf.setFont("helvetica", "bold")
+    pdf.text("Bill To:", leftMargin, yPos)
+    yPos += 8
+    pdf.setFont("helvetica", "normal")
+    pdf.text(selectedClient.name, leftMargin, yPos)
+    yPos += 5
+    if (selectedClient.email) pdf.text(selectedClient.email, leftMargin, yPos)
+    yPos += 5
+    if (selectedClient.phone) pdf.text(selectedClient.phone, leftMargin, yPos)
+    yPos += 5
+    if (selectedClient.address) {
+      pdf.text(selectedClient.address, leftMargin, yPos)
+      yPos += 5
+      if (selectedClient.city && selectedClient.state) {
+        pdf.text(`${selectedClient.city}, ${selectedClient.state} ${selectedClient.zip_code || ""}`, leftMargin, yPos)
+        yPos += 5
+      }
+      if (selectedClient.country) pdf.text(selectedClient.country, leftMargin, yPos)
+    }
+    
+    // Items table
+    yPos += 15
+    pdf.setFontSize(10)
+    pdf.setFont("helvetica", "bold")
+    
+    // Table headers
+    const col1 = leftMargin
+    const col2 = col1 + 80
+    const col3 = col2 + 25
+    const col4 = col3 + 25
+    const col5 = col4 + 25
+    
+    pdf.text("Description", col1, yPos)
+    pdf.text("Qty", col2, yPos)
+    pdf.text("Rate", col3, yPos)
+    pdf.text("Amount", col4, yPos)
+    
+    yPos += 5
+    pdf.line(leftMargin, yPos, rightMargin, yPos) // Header line
+    
+    // Table rows
+    yPos += 8
+    pdf.setFont("helvetica", "normal")
+    
+    items.forEach((item) => {
+      if (yPos > 250) { // Check if we need a new page
+        pdf.addPage()
+        yPos = 20
+      }
+      
+      pdf.text(item.description || "Item", col1, yPos)
+      pdf.text(item.quantity.toString(), col2, yPos)
+      pdf.text(formatCurrency(item.unit_price), col3, yPos)
+      pdf.text(formatCurrency(item.total), col4, yPos)
+      yPos += 6
+    })
+    
+    // Totals section
+    yPos += 5
+    pdf.line(leftMargin, yPos, rightMargin, yPos)
+    yPos += 8
+    
+    pdf.setFont("helvetica", "bold")
+    pdf.text("Subtotal:", col4, yPos)
+    pdf.text(formatCurrency(subtotal), col5, yPos, { align: "right" })
+    
+    if (lineDiscounts > 0) {
+      yPos += 5
+      pdf.text("Line Discounts:", col4, yPos)
+      pdf.text(`-${formatCurrency(lineDiscounts)}`, col5, yPos, { align: "right" })
+    }
+    
+    yPos += 5
+    pdf.text(`Tax (${Math.round(globalTaxRate * 100)}%):`, col4, yPos)
+    pdf.text(formatCurrency(taxAmount), col5, yPos, { align: "right" })
+    
+    if (formData.discount_amount > 0) {
+      yPos += 5
+      pdf.text("Additional Discount:", col4, yPos)
+      pdf.text(`-${formatCurrency(formData.discount_amount)}`, col5, yPos, { align: "right" })
+    }
+    
+    yPos += 5
+    pdf.line(leftMargin, yPos, rightMargin, yPos)
+    yPos += 8
+    
+    pdf.setFontSize(12)
+    pdf.text("Total:", col4, yPos)
+    pdf.text(formatCurrency(total), col5, yPos, { align: "right" })
+    
+    // Notes and terms
+    if (formData.notes || formData.terms) {
+      yPos += 20
+      if (yPos > 250) {
+        pdf.addPage()
+        yPos = 20
+      }
+      
+      if (formData.notes) {
+        pdf.setFontSize(10)
+        pdf.setFont("helvetica", "bold")
+        pdf.text("Notes:", leftMargin, yPos)
+        yPos += 5
+        pdf.setFont("helvetica", "normal")
+        const notesLines = pdf.splitTextToSize(formData.notes, 170)
+        notesLines.forEach((line: string) => {
+          if (yPos > 250) {
+            pdf.addPage()
+            yPos = 20
+            }
+          pdf.text(line, leftMargin, yPos)
+          yPos += 5
+        })
+      }
+      
+      if (formData.terms) {
+        yPos += 10
+        if (yPos > 250) {
+          pdf.addPage()
+          yPos = 20
+        }
+        pdf.setFontSize(10)
+        pdf.setFont("helvetica", "bold")
+        pdf.text("Terms & Conditions:", leftMargin, yPos)
+        yPos += 5
+        pdf.setFont("helvetica", "normal")
+        const termsLines = pdf.splitTextToSize(formData.terms, 170)
+        termsLines.forEach((line: string) => {
+          if (yPos > 250) {
+            pdf.addPage()
+            yPos = 20
+          }
+          pdf.text(line, leftMargin, yPos)
+          yPos += 5
+        })
+      }
+    }
+    
+    // Convert PDF to base64 string for display
+    const pdfBase64 = pdf.output('datauristring')
+    
+    onPreview?.({ pdfData: pdfBase64 })
   }
 
   const [showNewClientDialog, setShowNewClientDialog] = useState(false)
